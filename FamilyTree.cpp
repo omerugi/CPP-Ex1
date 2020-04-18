@@ -5,8 +5,6 @@
 
 using namespace std;
 using namespace family;
-static int f_or_m =0;
-
 
 void Node::set_father(string name){
     if(name == "null"){
@@ -20,7 +18,12 @@ void Node::set_father(string name){
 }
 void Node::set_mother(string name){
 
-    this->mother = new Node(name);
+    if(name == "null"){
+        mother = nullptr;
+
+    }else {
+        this->mother = new Node(name);
+    }
 
 };
 
@@ -77,8 +80,10 @@ string Node::get_name() {
 Tree& Tree::addFather(string name ,string dad){
 
     Node* temp = find_by_name(&root,name);
+    if(temp == nullptr || temp->get_father() != nullptr){
+        throw runtime_error(name+" was not found");
+    }
     temp->set_father(dad);
-    //cout<<temp->get_name();
 
     return *this;
 }
@@ -86,6 +91,10 @@ Tree& Tree::addFather(string name ,string dad){
 Tree& Tree::addMother(string name ,string mom){
 
     Node* temp = find_by_name(&root,name);
+    if(temp == nullptr || temp->get_mother() != nullptr){
+        throw runtime_error(name+" was not found");
+    }
+
     temp->set_mother(mom);
     //cout<<temp->get_name();
 
@@ -131,6 +140,10 @@ string Tree::find(string name){
         return this->root.get_father()->get_name();
     } else if(this->root.get_mother() != NULL && name == "mother" ){
         return this->root.get_mother()->get_name();
+    }else if(!this->root.get_father() && name == "father" ){
+        throw runtime_error(name + " no have");
+    }else if(this->root.get_mother() != NULL && name == "mother" ){
+        throw runtime_error(name + " no have");
     }
 
     string a,b;
@@ -149,7 +162,14 @@ string Tree::find(string name){
 };
 void Tree::remove(string name){
 
+    if(name == this->root.get_name()){
+        throw runtime_error(name+" is root");
+    }
+
     Node* temp = find_by_name_remove(&root,name);
+    if(!temp){
+        throw runtime_error(name+" not found");
+    }
     rec_remove(temp);
 
 }
@@ -198,8 +218,6 @@ void Tree::rec_dis(Node *root) {
     if(root->get_mother()){
         m = root->get_mother()->get_name();
     }
-
-    //cout<<root->get_name()<<" "<<"F: "<<f<<" M:"<<m<<endl;
 
     rec_dis(root->get_father());
 
@@ -274,14 +292,13 @@ Node *Tree::find_by_name_remove(Node *node, string name) {
         return temp;
     }
 
+
     Node* a = find_by_name_remove(node->get_father(),name);
     Node* b = find_by_name_remove(node->get_mother(),name);
     if(a) {
-        f_or_m =1;
         return a;
     }
     if(b) {
-        f_or_m =2;
         return b;
     }
 
